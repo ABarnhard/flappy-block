@@ -27,6 +27,7 @@ function create(){
   spaceKey.onDown.add(this.jump, this);
 
   this.block.animations.add('flap', [1, 2, 3], 20, false);
+  this.block.anchor.setTo(-0.2, 0.5);
 
   this.pipes = game.add.group();
   this.pipes.enableBody = true;
@@ -43,11 +44,16 @@ function update(){
   if(this.block.inWorld == false){
     this.restartGame();
   }
+  if(this.block.angle < 20){
+    this.block.angle += 1;
+  }
+
   game.physics.arcade.overlap(this.block, this.pipes, this.restartGame, null, this);
 }
 
 function jump(){
   this.block.animations.play('flap');
+  game.add.tween(this.block).to({angle: -20}, 100).start();
   this.block.body.velocity.y = -350;
 }
 
