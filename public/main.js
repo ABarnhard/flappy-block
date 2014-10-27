@@ -26,7 +26,7 @@ function create(){
   spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
   spaceKey.onDown.add(this.jump, this);
 
-  this.block.animations.add('flap', [1, 2, 3], 20, false);
+  this.block.animations.add('flap', [1, 2, 3, 0], 15, false);
   this.block.anchor.setTo(-0.2, 0.5);
 
   this.pipes = game.add.group();
@@ -37,6 +37,7 @@ function create(){
 
   this.score = 0;
   this.labelScore = game.add.text(20, 20, "0", { font: "30px Arial", fill: "#ffffff" });
+  this.scorePipe = null;
 
 }
 
@@ -49,12 +50,26 @@ function update(){
   }
 
   game.physics.arcade.overlap(this.block, this.pipes, this.restartGame, null, this);
+
+  if(!this.scorePipe){
+    this.scorePipe = this.pipes.getFirstAlive();
+  }
+
+  if(this.scorePipe){
+    if(this.scorePipe.x + 52 <= 100){
+      this.pipes.next();
+      this.scorePipe = this.pipes.next();
+      this.score += 1;
+      this.labelScore.text = this.score;
+    }
+  }
+
 }
 
 function jump(){
   this.block.animations.play('flap');
   game.add.tween(this.block).to({angle: -20}, 100).start();
-  this.block.body.velocity.y = -350;
+  this.block.body.velocity.y = -300;
 }
 
 function restartGame(){
@@ -65,7 +80,7 @@ function addOnePipe(x, y, pos){
   var pipe = this.pipes.getFirstDead();
   pipe.frame = pos;
   pipe.reset(x, y);
-  pipe.body.velocity.x = -200;
+  pipe.body.velocity.x = -150;
   pipe.checkWorldBounds = true;
   pipe.outOfBoundsKill = true;
 };
@@ -77,10 +92,8 @@ function addPipeRow(){
 
   y = -1 * (320 - hole);
   this.addOnePipe(x, y, 0);
-  y = y + 320 + 65;
+  y = y + 320 + 85;
   this.addOnePipe(x, y, 1);
-  this.score += 1;
-  this.labelScore.text = this.score;
 }
 
 game.state.add('main', mainState);
