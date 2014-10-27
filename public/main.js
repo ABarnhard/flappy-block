@@ -6,19 +6,24 @@ var game = new Phaser.Game(400, 490, Phaser.AUTO, 'gameDiv'),
       jump:jump,
       restartGame:restartGame,
       addOnePipe:addOnePipe,
-      addPipeRow:addPipeRow
+      addPipeRow:addPipeRow,
+      blockExplode: blockExplode
     },
-    spaceKey;
+    spaceKey,
+    blockMan,
+    pipeTimer;
 
 function preload(){
   game.stage.backgroundColor = '#71c5cf';
   game.load.spritesheet('block', '/assets/sprite.png', 24, 24);
   game.load.spritesheet('pipe', '/assets/pipes.png', 52, 320);
+  game.load.spritesheet('boom', '/assets/explosion.png', 40, 40);
 }
 
 function create(){
   game.physics.startSystem(Phaser.Physics.ARCADE);
-  this.block = this.game.add.sprite(100, 254, 'block');
+  this.block = blockMan = this.game.add.sprite(100, 254, 'block');
+
 
   game.physics.arcade.enable(this.block);
   this.block.body.gravity.y = 1000;
@@ -33,12 +38,16 @@ function create(){
   this.pipes.enableBody = true;
   this.pipes.createMultiple(6, 'pipe');
 
-  this.timer = game.time.events.loop(1500, this.addPipeRow, this);
+  pipeTimer = game.time.events.loop(1500, this.addPipeRow, this);
 
   this.score = 0;
   this.labelScore = game.add.text(20, 20, "0", { font: "30px Arial", fill: "#ffffff" });
   this.scorePipe = null;
 
+}
+
+function newGame(){
+  game.state.start('main');
 }
 
 function update(){
@@ -70,6 +79,25 @@ function jump(){
   this.block.animations.play('flap');
   game.add.tween(this.block).to({angle: -20}, 100).start();
   this.block.body.velocity.y = -300;
+}
+
+function blockExplode(){
+  blockMan.body.velocity.x = 0;
+  blockMan.body.velocity.y = 0;
+  pipeTimer.destroy();
+  this.pipes.forEachAlive(stopPipe, this);
+  var x = blockMan.x,
+      y = blockMan.y;
+
+  this.boom = this.game.make.sprite(x, y, 'boom');
+  var anim = this.boom.animations.add('boom', [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11], 10, false);
+  anim.onComplete.add(newGame);
+  this.boom.animations.play('boom');
+  // this.block.kill();
+}
+
+function stopPipe(pipe){
+  pipe.body.velocity.x = 0;
 }
 
 function restartGame(){
