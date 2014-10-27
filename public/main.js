@@ -7,11 +7,9 @@ var game = new Phaser.Game(400, 490, Phaser.AUTO, 'gameDiv'),
       restartGame:restartGame,
       addOnePipe:addOnePipe,
       addPipeRow:addPipeRow,
-      blockExplode: blockExplode
+      hitPipe: hitPipe
     },
-    spaceKey,
-    blockMan,
-    pipeTimer;
+    spaceKey;
 
 function preload(){
   game.stage.backgroundColor = '#71c5cf';
@@ -22,8 +20,7 @@ function preload(){
 
 function create(){
   game.physics.startSystem(Phaser.Physics.ARCADE);
-  this.block = blockMan = this.game.add.sprite(100, 254, 'block');
-
+  this.block = this.game.add.sprite(100, 254, 'block');
 
   game.physics.arcade.enable(this.block);
   this.block.body.gravity.y = 1000;
@@ -38,16 +35,17 @@ function create(){
   this.pipes.enableBody = true;
   this.pipes.createMultiple(6, 'pipe');
 
-  pipeTimer = game.time.events.loop(1500, this.addPipeRow, this);
+  this.pipeTimer = game.time.events.loop(1500, this.addPipeRow, this);
+
+  this.boom = this.game.add.sprite(0, 0,'boom');
+  this.boom.exists = false;
+  var anim = this.boom.animations.add('boom', [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11], 15, false);
+  anim.onComplete.add(this.restartGame);
 
   this.score = 0;
   this.labelScore = game.add.text(20, 20, "0", { font: "30px Arial", fill: "#ffffff" });
   this.scorePipe = null;
 
-}
-
-function newGame(){
-  game.state.start('main');
 }
 
 function update(){
@@ -58,7 +56,7 @@ function update(){
     this.block.angle += 1;
   }
 
-  game.physics.arcade.overlap(this.block, this.pipes, this.restartGame, null, this);
+  game.physics.arcade.overlap(this.block, this.pipes, this.hitPipe, null, this);
 
   if(!this.scorePipe){
     this.scorePipe = this.pipes.getFirstAlive();
@@ -76,24 +74,27 @@ function update(){
 }
 
 function jump(){
+  if(this.block.alive === false){return;}
   this.block.animations.play('flap');
   game.add.tween(this.block).to({angle: -20}, 100).start();
   this.block.body.velocity.y = -300;
 }
 
-function blockExplode(){
-  blockMan.body.velocity.x = 0;
-  blockMan.body.velocity.y = 0;
-  pipeTimer.destroy();
-  this.pipes.forEachAlive(stopPipe, this);
-  var x = blockMan.x,
-      y = blockMan.y;
+function hitPipe(){
+  if(this.block.alive === false){return;}
+  this.block.alive = false;
 
-  this.boom = this.game.make.sprite(x, y, 'boom');
-  var anim = this.boom.animations.add('boom', [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11], 10, false);
-  anim.onComplete.add(newGame);
+  game.time.events.remove(this.pipeTimer);
+
+  this.pipes.forEachAlive(stopPipe, this);
+
+  var x = this.block.x,
+      y = this.block.y;
+
+  this.block.exists = false;
+  this.boom.reset(x,y);
   this.boom.animations.play('boom');
-  // this.block.kill();
+
 }
 
 function stopPipe(pipe){
