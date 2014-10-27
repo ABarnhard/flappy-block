@@ -16,6 +16,7 @@ function preload(){
   game.load.spritesheet('block', '/assets/sprite.png', 24, 24);
   game.load.spritesheet('pipe', '/assets/pipes.png', 52, 320);
   game.load.spritesheet('boom', '/assets/explosion.png', 40, 40);
+  game.load.audio('bgsound', ['/assets/audio/oedipus_wizball_highscore.mp3', '/assets/audio/oedipus_wizball_highscore.ogg']);
 }
 
 function create(){
@@ -38,6 +39,7 @@ function create(){
   this.pipeTimer = game.time.events.loop(1500, this.addPipeRow, this);
 
   this.boom = this.game.add.sprite(0, 0,'boom');
+  this.boom.scale.setTo(2);
   this.boom.exists = false;
   var anim = this.boom.animations.add('boom', [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11], 15, false);
   anim.onComplete.add(this.restartGame);
@@ -46,6 +48,8 @@ function create(){
   this.labelScore = game.add.text(20, 20, "0", { font: "30px Arial", fill: "#ffffff" });
   this.scorePipe = null;
 
+  this.bgMusic = game.add.audio('bgsound');
+  this.bgMusic.play();
 }
 
 function update(){
@@ -94,7 +98,7 @@ function hitPipe(){
   this.block.exists = false;
   this.boom.reset(x,y);
   this.boom.animations.play('boom');
-
+  this.bgMusic.stop();
 }
 
 function stopPipe(pipe){
