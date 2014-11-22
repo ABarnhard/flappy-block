@@ -42,7 +42,7 @@ function create(){
   this.boom.scale.setTo(2);
   this.boom.exists = false;
   var anim = this.boom.animations.add('boom', [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11], 15, false);
-  anim.onComplete.add(this.restartGame);
+  anim.onComplete.add(this.restartGame).bind(this);
 
   this.score = 0;
   this.labelScore = game.add.text(20, 20, "0", { font: "30px Arial", fill: "#ffffff" });
