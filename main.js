@@ -106,6 +106,7 @@ function stopPipe(pipe){
 }
 
 function restartGame(){
+  this.bgMusic.stop();
   game.state.start('main');
 }
 
