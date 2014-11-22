@@ -17,7 +17,7 @@
     function create(){
         var text = "- Flappy Block -\n Welcome \n Press SPACE to start.",
             style = { font: "35px Arial", fill: "#ff0044", align: "center"},
-            t = game.add.text(game.world.centerX-300, 0, text, style);
+            t = game.add.text(game.world.centerX-200, 0, text, style);
 
         spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         spaceKey.onDown.add(this.beginGame, this);
